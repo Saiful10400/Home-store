@@ -77,7 +77,7 @@ const Home = () => {
                   alt=""
                 />
                 <span className=" w-[200px]  overflow-hidden">{item.banglaName}</span>
-                <span className="w-[100px] ">{item.sellingPrice}/=</span>
+                <span className="w-[100px] text-xl font-bold ">{item.sellingPrice}/=</span>
               </button>
             ))
           : ""}
