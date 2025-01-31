@@ -2,6 +2,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { tProducts } from "../types";
 import { useNavigate } from "react-router-dom";
+import { LucideClockArrowDown } from "lucide-react";
 
 const Home = () => {
   const [products, setProducts] = useState(null);
@@ -12,19 +13,54 @@ const Home = () => {
   }, []);
 
   const move = useNavigate();
+  const [searchedStatus, setSearchedStatus] = useState(false);
+  const searchHandle = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const searchTerm = e.currentTarget.searchTerm.value;
+    axios
+      .get(
+        "https://home-store-backend.vercel.app/api/shop/find-product?searchTerm=" +
+          searchTerm
+      )
+      .then((res) => {
+        setProducts(res.data.data);
+        setSearchedStatus(true);
+      });
+  };
 
   return (
     <div>
-      <form className="flex items-center gap-x-5 px-5 sticky z-10 top-6 pt-6 pb-4 bg-white">
+      <form
+        onSubmit={searchHandle}
+        className="flex items-center gap-x-5 px-5 sticky z-10 top-6 pt-6 pb-4 bg-white"
+      >
         <input
-          name="englishName"
+          name="searchTerm"
           className="w-full border-2 border-gray-300 focus:outline-green-600 font-medium text-lg py-2 pl-1 rounded-md"
           type="text"
           placeholder="পন্যের নাম"
         />
-        <button className="bg-gray-800 text-white py-3 px-5 rounded-md">
-          খুঁজুন
-        </button>
+        {searchedStatus ? (
+          <button
+            onClick={() => {
+              axios
+                .get(
+                  "https://home-store-backend.vercel.app/api/shop/find-product"
+                )
+                .then((res) => {
+                  setProducts(res.data.data);
+                  setSearchedStatus(false);
+                });
+            }}
+            className="bg-gray-800 text-white py-3 px-5 rounded-md"
+          >
+            <LucideClockArrowDown />
+          </button>
+        ) : (
+          <button className="bg-gray-800 text-white py-3 px-5 rounded-md">
+            খুঁজুন
+          </button>
+        )}
       </form>
 
       <div className="flex flex-col relative   gap-2 mt-6">
@@ -40,7 +76,7 @@ const Home = () => {
                   src={item.image}
                   alt=""
                 />
-                <span className=" w-[200px]">{item.banglaName}</span>
+                <span className=" w-[200px]  overflow-hidden">{item.banglaName}</span>
                 <span className="w-[100px] ">{item.sellingPrice}/=</span>
               </button>
             ))
