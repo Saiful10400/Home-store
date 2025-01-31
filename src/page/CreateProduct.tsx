@@ -24,7 +24,7 @@ const [waiting,setWaiting]=useState(false)
         setWaiting(true)
         const photoUrl=await imageUploadToDb(form.image.files[0])
         data.image=photoUrl
-        axios.post("http://localhost:8000/api/shop/create-product",data)
+        axios.post("https://home-store-backend.vercel.app/api/shop/create-product",data)
         .then(res=>{
             if(res.data.statusCode===200){
                 setWaiting(false)

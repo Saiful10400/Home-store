@@ -11,7 +11,7 @@ const SingleProduct = () => {
     const [products, setProducts] = useState<tProducts|null>(null);
     useEffect(() => {
       axios
-        .get("http://localhost:8000/api/shop/find-product?id="+id)
+        .get("https://home-store-backend.vercel.app/api/shop/find-product?id="+id)
         .then((res) => setProducts(res.data.data));
     }, [id]);
 

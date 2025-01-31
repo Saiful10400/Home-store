@@ -7,7 +7,7 @@ const Home = () => {
   const [products, setProducts] = useState(null);
   useEffect(() => {
     axios
-      .get("http://localhost:8000/api/shop/find-product")
+      .get("https://home-store-backend.vercel.app/api/shop/find-product")
       .then((res) => setProducts(res.data.data));
   }, []);
 
