@@ -38,10 +38,10 @@ const [waiting,setWaiting]=useState(false)
 
     return (
        <form onSubmit={formHandle} className="flex flex-col gap-3 px-2">
-        <input name="englishName" className="w-full border-2 border-gray-300 focus:outline-green-600 font-medium text-lg py-2 pl-1 rounded-md" type="text" placeholder="ইংরেজি নাম" />
-        <input name="banglaName" className="w-full border-2 border-gray-300 focus:outline-green-600 font-medium text-lg py-2 pl-1 rounded-md" type="text" placeholder="বাংলা নাম" />
-        <input name="buyingPrice" className="w-full border-2 border-gray-300 focus:outline-green-600 font-medium text-lg py-2 pl-1 rounded-md" type="number" placeholder="ক্রয় মুল্য" />
-        <input name="sellingPrice" className="w-full border-2 border-gray-300 focus:outline-green-600 font-medium text-lg py-2 pl-1 rounded-md" type="number" placeholder="বিক্রয় মুল্য" />
+        <input required name="englishName" className="w-full border-2 border-gray-300 focus:outline-green-600 font-medium text-lg py-2 pl-1 rounded-md" type="text" placeholder="ইংরেজি নাম" />
+        <input required name="banglaName" className="w-full border-2 border-gray-300 focus:outline-green-600 font-medium text-lg py-2 pl-1 rounded-md" type="text" placeholder="বাংলা নাম" />
+        <input required name="buyingPrice" className="w-full border-2 border-gray-300 focus:outline-green-600 font-medium text-lg py-2 pl-1 rounded-md" type="number" placeholder="ক্রয় মুল্য" />
+        <input required name="sellingPrice" className="w-full border-2 border-gray-300 focus:outline-green-600 font-medium text-lg py-2 pl-1 rounded-md" type="number" placeholder="বিক্রয় মুল্য" />
         <label htmlFor="image">
             <div className="w-full rounded-md flex justify-center items-center flex-col gap-2 border-2 border-gray-300 py-3">
                 {
