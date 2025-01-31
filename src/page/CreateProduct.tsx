@@ -1,9 +1,10 @@
 import { Camera, CheckCircle2 } from "lucide-react";
-import { tProducts } from "../types";
+ 
 import { imageUploadToDb } from "../utils/imageUpload";
 import axios from "axios";
 import {  useState } from "react";
 import { toast } from "react-toastify";
+import { tProducts } from "../types";
 
  
 
