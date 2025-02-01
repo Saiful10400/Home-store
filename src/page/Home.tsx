@@ -68,7 +68,7 @@ const Home = () => {
           ? (products as tProducts[]).map((item: tProducts, idx: number) => (
               <button
                 onClick={() => move(`product/${item._id}`)}
-                className=" gap-2  w-full bg-gray-200 py-2 flex justify-between items-center"
+                className=" gap-2 rounded-md w-full bg-gray-200 py-2 flex justify-between items-center"
               >
                 <span className="w-[50px] ">{++idx}</span>
                 <img
@@ -76,8 +76,12 @@ const Home = () => {
                   src={item.image}
                   alt=""
                 />
-                <span className=" w-[200px]  overflow-hidden">{item.banglaName}</span>
-                <span className="w-[100px] text-xl font-bold ">{item.sellingPrice}/=</span>
+                <span className=" w-[200px]  overflow-hidden">
+                  {item.banglaName}
+                </span>
+                <span className="w-[100px] text-xl font-bold ">
+                  {item.sellingPrice}/=
+                </span>
               </button>
             ))
           : ""}

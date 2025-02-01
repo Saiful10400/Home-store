@@ -22,7 +22,8 @@ const Nav = () => {
 
   return (
     <div className="sticky top-0 bg-white  z-20">
-      <button className="pl-2"
+      <button
+        className="pl-2"
         onClick={(e) => {
           e.stopPropagation();
           setShow((p) => !p);
@@ -38,6 +39,18 @@ const Nav = () => {
       >
         <button
           className="bg-gray-700 text-white w-full inline-block text-center rounded-md py-1"
+          onClick={() => navigate("/sell-management")}
+        >
+          বিক্রির হিসাব
+        </button>
+        <button
+          className="bg-gray-700 text-white w-full inline-block text-center rounded-md py-1"
+          onClick={() => navigate("/due-management")}
+        >
+          বাকির হিসাব
+        </button>
+        <button
+          className="bg-gray-700 text-white w-full inline-block text-center rounded-md py-1"
           onClick={() => navigate("/")}
         >
           Home
@@ -46,7 +59,7 @@ const Nav = () => {
           className="bg-gray-700 text-white w-full inline-block text-center rounded-md py-1"
           onClick={() => navigate("/create-product")}
         >
-          Create product
+          নতুন পণ্য যুক্ত করুন
         </button>
       </div>
     </div>
