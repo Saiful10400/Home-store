@@ -4,32 +4,60 @@ import { useNavigate, useParams } from "react-router-dom";
 import { tProducts } from "../types";
 import { Eye, Trash } from "lucide-react";
 import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 
 const SingleProduct = () => {
+  const[refetch,setRefetch]=useState(false)
   const { id } = useParams();
   const [products, setProducts] = useState<tProducts | null>(null);
-  const move=useNavigate()
+  const move = useNavigate();
   useEffect(() => {
     axios
       .get(
         "https://home-store-backend.vercel.app/api/shop/find-product?id=" + id
       )
       .then((res) => setProducts(res.data.data));
-  }, [id]);
+  }, [id,refetch]);
 
   const [showBuyPrice, setShowBuyPrice] = useState(false);
 
-  const delteHandle=(id:string)=>{
-    axios.delete(
+  const delteHandle = (id: string) => {
+    axios
+      .delete(
         "https://home-store-backend.vercel.app/api/shop/delete-product/" + id
       )
-      .then(res=>{
-        if(res.data.statusCode===200){
-            toast.success("ডিলিট হয়েছে।")
-move("/")
-          }
-      })
-  }
+      .then((res) => {
+        if (res.data.statusCode === 200) {
+          toast.success("ডিলিট হয়েছে।");
+          move("/");
+        }
+      });
+  };
+
+  const [waiting, setWaiting] = useState(false);
+
+  const formHandle = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const data: Partial<tProducts> = {
+      banglaName: form.banglaName.value,
+      englishName: form.englishName.value,
+      buyingPrice: form.buyingPrice.value,
+      sellingPrice: form.sellingPrice.value,
+    };
+    axios.put("https://home-store-backend.vercel.app/api/shop/update-product/"+products?._id, data).then((res) => {
+      if (res.data?.statusCode === 200) {
+        setWaiting(false);
+        Swal.fire({
+          title: "আপডেট হয়েছে",
+          icon: "success",
+          draggable: true,
+        });
+        setRefetch(p=>!p)
+        
+      }
+    });
+  };
 
   return (
     <div>
@@ -64,7 +92,54 @@ move("/")
           </tr>
         </tbody>
       </table>
-      <button onClick={()=>delteHandle(products?._id as string)} className="bg-red-400 flex items-start text-white p-2 rounded-md mx-auto my-4 gap-1"><Trash/> Delete</button>
+      <button
+        onClick={() => delteHandle(products?._id as string)}
+        className="bg-red-400 flex items-start text-white p-2 rounded-md mx-auto my-4 gap-1"
+      >
+        <Trash /> Delete
+      </button>
+
+      <form onSubmit={formHandle} className="flex flex-col gap-3">
+        <input
+          required
+          name="englishName"
+          className="w-full border-2 border-gray-300 focus:outline-green-600 font-medium text-lg py-2 pl-1 rounded-md"
+          type="text"
+          placeholder="ইংরেজি নাম"
+          defaultValue={products?.englishName}
+        />
+        <input
+          required
+          name="banglaName"
+          className="w-full border-2 border-gray-300 focus:outline-green-600 font-medium text-lg py-2 pl-1 rounded-md"
+          type="text"
+          placeholder="বাংলা নাম"
+          defaultValue={products?.banglaName}
+        />
+        <input
+          required
+          name="buyingPrice"
+          className="w-full border-2 border-gray-300 focus:outline-green-600 font-medium text-lg py-2 pl-1 rounded-md"
+          type="password"
+          placeholder="ক্রয় মুল্য"
+          defaultValue={products?.buyingPrice}
+        />
+        <input
+          required
+          name="sellingPrice"
+          className="w-full border-2 border-gray-300 focus:outline-green-600 font-medium text-lg py-2 pl-1 rounded-md"
+          type="text"
+          placeholder="বিক্রয় মুল্য"
+          defaultValue={products?.sellingPrice}
+        />
+
+        <button
+          disabled={waiting}
+          className="bg-green-400 rounded-md py-2 text-white text-2xl font-bold"
+        >
+          {waiting ? "অপেক্ষা করুন" : "Update"}
+        </button>
+      </form>
     </div>
   );
 };
