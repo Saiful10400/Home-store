@@ -39,21 +39,27 @@ const Nav = () => {
       >
         <button
           className="bg-gray-700 text-white w-full inline-block text-center rounded-md py-1"
+          onClick={() => navigate("/")}
+        >
+          Home
+        </button>
+        <button
+          className="bg-gray-700 text-white w-full inline-block text-center rounded-md py-1"
           onClick={() => navigate("/sell-management")}
         >
-          বিক্রির হিসাব
+          নতুন বিক্রি
+        </button>
+        <button
+          className="bg-gray-700 text-white w-full inline-block text-center rounded-md py-1"
+          onClick={() => navigate("/all-sells")}
+        >
+          সকল বিক্রির হিসাব
         </button>
         <button
           className="bg-gray-700 text-white w-full inline-block text-center rounded-md py-1"
           onClick={() => navigate("/due-management")}
         >
           বাকির হিসাব
-        </button>
-        <button
-          className="bg-gray-700 text-white w-full inline-block text-center rounded-md py-1"
-          onClick={() => navigate("/")}
-        >
-          Home
         </button>
         <button
           className="bg-gray-700 text-white w-full inline-block text-center rounded-md py-1"
