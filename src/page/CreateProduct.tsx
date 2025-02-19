@@ -3,8 +3,8 @@ import { Camera, CheckCircle2 } from "lucide-react";
 import { imageUploadToDb } from "../utils/imageUpload";
 import axios from "axios";
 import { useState } from "react";
-import { toast } from "react-toastify";
 import { tProducts } from "../types";
+import Swal from "sweetalert2";
 
 const CreateProduct = () => {
   const [waiting, setWaiting] = useState(false);
@@ -23,13 +23,22 @@ const CreateProduct = () => {
     const photoUrl = await imageUploadToDb(form.image.files[0]);
     data.image = photoUrl;
     axios
-      .post("https://home-store-backend.vercel.app/api/shop/create-product", data)
+      .post(
+        "https://home-store-backend.vercel.app/api/shop/create-product",
+        data
+      )
       .then((res) => {
         if (res.data.statusCode === 200) {
           setWaiting(false);
           form.reset();
           setIsImageAdded(false);
-          toast.success("নতুন পন্য যুক্ত হয়েছে ।");
+          Swal.fire({
+            title: "যুক্ত হয়েছে",
+            icon: "success",
+            draggable: true,
+          }).then(()=>{
+            window.location.reload()
+          })
         }
       });
   };

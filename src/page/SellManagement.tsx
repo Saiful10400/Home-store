@@ -138,8 +138,10 @@ setWaiting(true)
         Swal.fire({
           title: "যুক্ত হয়েছে",
           icon: "success",
-          draggable: true
-        });
+          draggable: true,
+        }).then(()=>{
+          window.location.reload()
+        })
       }
     })
   };

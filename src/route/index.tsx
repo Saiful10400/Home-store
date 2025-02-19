@@ -6,6 +6,7 @@ import SingleProduct from "../page/SingleProduct";
 import DueCustomer from "../page/DueCustomer";
 import SellManagement from "../page/SellManagement";
 import AllSells from "../page/AllSells";
+import SingleDaySells from "../page/SingleDaySells";
  
 
  
@@ -19,6 +20,7 @@ const pagesRoute=
         <Route path="/due-management" element={<DueCustomer/>}/>
         <Route path="/sell-management" element={<SellManagement/>}/>
         <Route path="/all-sells" element={<AllSells/>}/>
+        <Route path="/all-sells/:id" element={<SingleDaySells/>}/>
     </Route>
 </Routes>
 

@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 
 interface tGroupedData {
@@ -34,13 +35,13 @@ useEffect(()=>{
 axios.get("https://home-store-backend.vercel.app/api/shop/sell").then(res=>setAllSells(res?.data?.data))
 },[])
 
-console.log(allSells)
+ 
 
     return (
          <div className="flex flex-col relative   gap-2 mt-6">
                 {allSells
                   ? (allSells ).map((item:tGroupedData) => (
-                      <button
+                      <Link to={item._id}
                         // onClick={() => move(`product/${item._id}`)}
                         className=" gap-2 rounded-md w-full bg-gray-200 py-2 flex flex-col  justify-between items-center"
                       >
@@ -57,7 +58,7 @@ console.log(allSells)
                           মোট লাভঃ  {item?.data?.reduce((acc:number,item)=>acc+item.profit,0)} =/
                         </span>
                        
-                      </button>
+                      </Link>
                     ))
                   : ""}
               </div>
