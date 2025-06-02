@@ -6,11 +6,11 @@ import { ToastContainer } from "react-toastify";
 
 const Root = () => {
     return (
-        <>
+        <div>
             <Nav/>
-            <div className="px-2"><Outlet/></div>
+            <div className="px-2 "><Outlet/></div>
             <ToastContainer /> 
-        </>
+        </div>
     );
 };
 

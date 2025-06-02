@@ -125,25 +125,25 @@ const SellManagement = () => {
       toast.error("বাকেয়া ক্রেতার নাম উল্লখ করেন নি।");
       return;
     }
-setWaiting(true)
+    setWaiting(true)
     axios.post("https://home-store-backend.vercel.app/api/shop/sell/create", {
       productField,
       dueCustomerId,
       discount: Number(e.currentTarget.discount.value),
       paymentType: sellingStatus,
     })
-    .then(res=>{
-      if(res.data.statusCode===200){
-        setWaiting(false)
-        Swal.fire({
-          title: "যুক্ত হয়েছে",
-          icon: "success",
-          draggable: true,
-        }).then(()=>{
-          window.location.reload()
-        })
-      }
-    })
+      .then(res => {
+        if (res.data.statusCode === 200) {
+          setWaiting(false)
+          Swal.fire({
+            title: "যুক্ত হয়েছে",
+            icon: "success",
+            draggable: true,
+          }).then(() => {
+            window.location.reload()
+          })
+        }
+      })
   };
 
   return (

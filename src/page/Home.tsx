@@ -9,7 +9,7 @@ const Home = () => {
   useEffect(() => {
     axios
       .get("https://home-store-backend.vercel.app/api/shop/find-product")
-      .then((res) => setProducts(res.data.data));
+      .then((res) => setProducts(res.data.data?.slice(0,5)));
   }, []);
 
   const move = useNavigate();
@@ -29,7 +29,7 @@ const Home = () => {
   };
 
   return (
-    <div>
+    <div >
       <form
         onSubmit={searchHandle}
         className="flex items-center gap-x-5 px-5 sticky z-10 top-6 pt-6 pb-4 bg-white"

@@ -5,9 +5,11 @@ import { tProducts } from "../types";
 import { Eye, Trash } from "lucide-react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
+import BarCodeScannerComponent from "../component/Shared/BarCodeScannerComponent";
+
 
 const SingleProduct = () => {
-  const[refetch,setRefetch]=useState(false)
+  const [refetch, setRefetch] = useState(false)
   const { id } = useParams();
   const [products, setProducts] = useState<tProducts | null>(null);
   const move = useNavigate();
@@ -17,7 +19,7 @@ const SingleProduct = () => {
         "https://home-store-backend.vercel.app/api/shop/find-product?id=" + id
       )
       .then((res) => setProducts(res.data.data));
-  }, [id,refetch]);
+  }, [id, refetch]);
 
   const [showBuyPrice, setShowBuyPrice] = useState(false);
 
@@ -45,7 +47,7 @@ const SingleProduct = () => {
       buyingPrice: form.buyingPrice.value,
       sellingPrice: form.sellingPrice.value,
     };
-    axios.put("https://home-store-backend.vercel.app/api/shop/update-product/"+products?._id, data).then((res) => {
+    axios.put("https://home-store-backend.vercel.app/api/shop/update-product/" + products?._id, data).then((res) => {
       if (res.data?.statusCode === 200) {
         setWaiting(false);
         Swal.fire({
@@ -53,8 +55,8 @@ const SingleProduct = () => {
           icon: "success",
           draggable: true,
         });
-        setRefetch(p=>!p)
-        
+        setRefetch(p => !p)
+
       }
     });
   };
@@ -140,6 +142,7 @@ const SingleProduct = () => {
           {waiting ? "অপেক্ষা করুন" : "Update"}
         </button>
       </form>
+      <BarCodeScannerComponent />
     </div>
   );
 };
