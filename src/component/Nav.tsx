@@ -61,6 +61,12 @@ const Nav = () => {
         >
           বাকির হিসাব
         </button>
+        <button
+          className="bg-gray-700 text-white w-full inline-block text-center rounded-md py-1"
+          onClick={() => navigate("/calculator")}
+        >
+         কেলকুলেটর
+        </button>
         {/* <button
           className="bg-gray-700 text-white w-full inline-block text-center rounded-md py-1"
           onClick={() => navigate("/create-product")}
