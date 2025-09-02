@@ -6,6 +6,9 @@ import { Eye, Trash } from "lucide-react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import BarCodeScannerComponent from "../component/Shared/BarCodeScannerComponent";
+import UpdateBarcode from "../component/extraInfoFields/UpdateBarcode";
+import UpdateStock from "../component/extraInfoFields/UpdateStock";
+import UpdateExpireDate from "../component/extraInfoFields/UpdateExpireDate";
 
 
 const SingleProduct = () => {
@@ -60,7 +63,7 @@ const SingleProduct = () => {
       }
     });
   };
-
+  console.log(products);
   return (
     <div>
       <img src={products?.image} className="w-full" alt="" />
@@ -91,6 +94,10 @@ const SingleProduct = () => {
           <tr>
             <td className="border p-2">বিক্রয় মূল্য</td>
             <td className="border p-2">{products?.sellingPrice} /=</td>
+          </tr>
+          <tr>
+            <td className="border p-2">Bar Code</td>
+            <td className="border p-2">{products?.barCode || "n/a"}</td>
           </tr>
         </tbody>
       </table>
@@ -142,6 +149,21 @@ const SingleProduct = () => {
           {waiting ? "অপেক্ষা করুন" : "Update"}
         </button>
       </form>
+
+
+
+
+      {!products?.barCode || !products?.strock || products?.expiredDate ? <div>
+        <h1 className="text-2xl font-bold my-3 text-center mt-5">অতিরিক্ত তথ্য</h1>
+        <div className="flex justify-evenly mb-12">{!products?.barCode ? <UpdateBarcode id={products?._id as string} /> : null}
+          {!products?.strock ? <UpdateStock /> : null}
+          {!products?.expiredDate ? <UpdateExpireDate /> : null}</div>
+      </div> : null}
+
+
+
+
+
       <BarCodeScannerComponent />
     </div>
   );

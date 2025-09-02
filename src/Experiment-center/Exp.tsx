@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { BrowserMultiFormatReader } from "@zxing/library";
+import { BarcodeFormat, BrowserMultiFormatReader, DecodeHintType } from "@zxing/library";
 
 
 const Exp = () => {
@@ -9,7 +9,21 @@ const Exp = () => {
     const [result, setResult] = useState("")
 
 
-    const codeReader = new BrowserMultiFormatReader()
+    const hints = new Map();
+    hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+        BarcodeFormat.CODE_128,
+        BarcodeFormat.CODE_39,
+        BarcodeFormat.EAN_13,
+        BarcodeFormat.EAN_8,
+        BarcodeFormat.UPC_A,
+        BarcodeFormat.UPC_E,
+        BarcodeFormat.ITF,
+    ]);
+
+
+
+    const codeReader = new BrowserMultiFormatReader(hints)
+
     useEffect(() => {
         if (videoRef.current) {
             videoRef.current.style.display = "none"
@@ -33,18 +47,18 @@ const Exp = () => {
             codeReader
                 .listVideoInputDevices()
                 .then((videoInputDevices) => {
-                    
+
                     const backCameras = videoInputDevices.filter((d) =>
                         d.label.toLowerCase().includes("back")
-                );
-                setResult(videoInputDevices.map(device => device.label).join(", ")+`? backcamera total:${backCameras.length}`);
+                    );
 
-                    const selectedCamera =backCameras.length > 0 ? backCameras[backCameras.length-1] : videoInputDevices[videoInputDevices.length - 1];
+
+                    const selectedCamera = backCameras.length > 0 ? backCameras[backCameras.length - 1] : videoInputDevices[0];
 
                     codeReader.decodeFromVideoDevice(selectedCamera.deviceId, videoRef.current!, (result, err) => {
                         if (result) {
                             setResult(result.getText());
-                            codeReader.reset(); // Stop scanning after a successful scan
+
                         }
                         if (err) {
                             // console.error(err);
