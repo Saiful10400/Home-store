@@ -26,10 +26,14 @@ const Exp = () => {
             videoRef.current.style.display = "block"
         }
         if (videoRef.current) {
+
+
+
+
             codeReader
                 .listVideoInputDevices()
                 .then((videoInputDevices) => {
-                    const selectedDeviceId = videoInputDevices[0].deviceId;
+                    const selectedDeviceId = videoInputDevices.find(device => device.label.toLowerCase().includes('back'))?.deviceId || videoInputDevices[0].deviceId;
                     codeReader.decodeFromVideoDevice(selectedDeviceId, videoRef.current!, (result, err) => {
                         if (result) {
                             setResult(result.getText());
