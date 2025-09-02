@@ -34,8 +34,14 @@ const Exp = () => {
                 .listVideoInputDevices()
                 .then((videoInputDevices) => {
                     setResult(videoInputDevices.map(device => device.label).join(", "));
-                    // const selectedDeviceId = videoInputDevices.find(device => device.label.toLowerCase().includes('back'))?.deviceId || videoInputDevices[videoInputDevices.length-1].deviceId;
-                    codeReader.decodeFromConstraints({ video: { facingMode: { exact: "environment" } } }, videoRef.current!, (result, err) => {
+
+                    const backCameras = videoInputDevices.filter((d) =>
+                        d.label.toLowerCase().includes("back")
+                    );
+
+                    const selectedCamera =backCameras.length > 0 ? backCameras[0] : videoInputDevices[videoInputDevices.length - 1];
+
+                    codeReader.decodeFromVideoDevice(selectedCamera.deviceId, videoRef.current!, (result, err) => {
                         if (result) {
                             setResult(result.getText());
                             codeReader.reset(); // Stop scanning after a successful scan
