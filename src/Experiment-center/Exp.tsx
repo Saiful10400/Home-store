@@ -33,13 +33,13 @@ const Exp = () => {
             codeReader
                 .listVideoInputDevices()
                 .then((videoInputDevices) => {
-                    setResult(videoInputDevices.map(device => device.label).join(", "));
-
+                    
                     const backCameras = videoInputDevices.filter((d) =>
                         d.label.toLowerCase().includes("back")
-                    );
+                );
+                setResult(videoInputDevices.map(device => device.label).join(", ")+`? backcamera total:${backCameras.length}`);
 
-                    const selectedCamera =backCameras.length > 0 ? backCameras[0] : videoInputDevices[videoInputDevices.length - 1];
+                    const selectedCamera =backCameras.length > 0 ? backCameras[backCameras.length-1] : videoInputDevices[videoInputDevices.length - 1];
 
                     codeReader.decodeFromVideoDevice(selectedCamera.deviceId, videoRef.current!, (result, err) => {
                         if (result) {
