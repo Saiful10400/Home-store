@@ -33,8 +33,8 @@ const Exp = () => {
             codeReader
                 .listVideoInputDevices()
                 .then((videoInputDevices) => {
-                    setResult(videoInputDevices.length.toString());
-                    const selectedDeviceId = videoInputDevices.find(device => device.label.toLowerCase().includes('back'))?.deviceId || videoInputDevices[0].deviceId;
+                    setResult(videoInputDevices.map(device => device.label).join(", "));
+                    const selectedDeviceId = videoInputDevices.find(device => device.label.toLowerCase().includes('back'))?.deviceId || videoInputDevices[videoInputDevices.length-1].deviceId;
                     codeReader.decodeFromVideoDevice(selectedDeviceId, videoRef.current!, (result, err) => {
                         if (result) {
                             setResult(result.getText());
