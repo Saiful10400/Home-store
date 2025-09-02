@@ -5,7 +5,7 @@ export type tProducts = {
   buyingPrice: number;
   sellingPrice: number;
   image: string;
-  expiredDate: Date | null;
-  strock: number | null;
-  barCode: number | null;
+  expiredDate?: Date | null;
+  strock?: number | null;
+  barCode?: number | null;
 };

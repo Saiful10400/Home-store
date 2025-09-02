@@ -18,6 +18,7 @@ const CreateProduct = () => {
       buyingPrice: form.buyingPrice.value,
       sellingPrice: form.sellingPrice.value,
       image: "",
+   
     };
     setWaiting(true);
     const photoUrl = await imageUploadToDb(form.image.files[0]);
