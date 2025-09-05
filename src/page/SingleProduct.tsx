@@ -10,39 +10,51 @@ import UpdateBarcode from "../component/extraInfoFields/UpdateBarcode";
 import UpdateStock from "../component/extraInfoFields/UpdateStock";
 import UpdateExpireDate from "../component/extraInfoFields/UpdateExpireDate";
 
-
 const SingleProduct = () => {
-  const [refetch, setRefetch] = useState(false)
+  const [refetch, setRefetch] = useState(false);
   const { id } = useParams();
   const [products, setProducts] = useState<tProducts | null>(null);
-  const move = useNavigate();
+  const navigate = useNavigate();
+  const [showBuyPrice, setShowBuyPrice] = useState(false);
+  const [waiting, setWaiting] = useState(false);
+
   useEffect(() => {
     axios
-      .get(
-        "https://home-store-backend.vercel.app/api/shop/find-product?id=" + id
-      )
+      .get(`https://home-store-backend.vercel.app/api/shop/find-product?id=${id}`)
       .then((res) => setProducts(res.data.data));
   }, [id, refetch]);
 
-  const [showBuyPrice, setShowBuyPrice] = useState(false);
-
-  const delteHandle = (id: string) => {
-    axios
-      .delete(
-        "https://home-store-backend.vercel.app/api/shop/delete-product/" + id
-      )
-      .then((res) => {
-        if (res.data.statusCode === 200) {
-          toast.success("ডিলিট হয়েছে।");
-          move("/");
-        }
-      });
+  const deleteHandle = (id: string) => {
+    Swal.fire({
+      title: "আপনি কি নিশ্চিত?",
+      text: "এই পণ্যটি ডিলিট করলে এটি পুনরায় ফিরানো যাবে না!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "হ্যাঁ, ডিলিট করুন",
+      cancelButtonText: "বাতিল",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        axios
+          .delete(`https://home-store-backend.vercel.app/api/shop/delete-product/${id}`)
+          .then((res) => {
+            if (res.data.statusCode === 200) {
+              toast.success("ডিলিট হয়েছে।");
+              navigate("/");
+            }
+          })
+          .catch((err) => {
+            toast.error("ডিলিট করা যায়নি। আবার চেষ্টা করুন।");
+            console.error(err);
+          });
+      }
+    });
   };
-
-  const [waiting, setWaiting] = useState(false);
 
   const formHandle = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setWaiting(true);
     const form = e.currentTarget;
     const data: Partial<tProducts> = {
       banglaName: form.banglaName.value,
@@ -50,120 +62,136 @@ const SingleProduct = () => {
       buyingPrice: form.buyingPrice.value,
       sellingPrice: form.sellingPrice.value,
     };
-    axios.put("https://home-store-backend.vercel.app/api/shop/update-product/" + products?._id, data).then((res) => {
-      if (res.data?.statusCode === 200) {
+    axios
+      .put(
+        `https://home-store-backend.vercel.app/api/shop/update-product/${products?._id}`,
+        data
+      )
+      .then((res) => {
         setWaiting(false);
-        Swal.fire({
-          title: "আপডেট হয়েছে",
-          icon: "success",
-          draggable: true,
-        });
-        setRefetch(p => !p)
-
-      }
-    });
+        if (res.data?.statusCode === 200) {
+          Swal.fire({
+            title: "আপডেট হয়েছে",
+            icon: "success",
+            draggable: true,
+          });
+          setRefetch((p) => !p);
+        }
+      });
   };
-  console.log(products);
+
   return (
-    <div>
-      <img src={products?.image} className="w-full" alt="" />
-      <table className="w-full mt-3">
-        <th></th>
-        <th></th>
-        <tbody>
-          <tr>
-            <td className="border p-2">বাংলা নাম</td>
-            <td className="border p-2">{products?.banglaName}</td>
-          </tr>
-          <tr>
-            <td className="border p-2">ইংরেজি নাম</td>
-            <td className="border p-2">{products?.englishName}</td>
-          </tr>
-          <tr>
-            <td className="border p-2">ক্রয় মূল্য</td>
-            <td className="border p-2">
+    <div className="max-w-5xl mx-auto p-4 md:p-8 space-y-6">
+      {/* Product Image */}
+      <div className="w-full rounded-xl overflow-hidden shadow-lg">
+        <img
+          src={products?.image}
+          alt={products?.banglaName}
+          className="w-full object-cover max-h-96"
+        />
+      </div>
+
+      {/* Product Info Card */}
+      <div className="bg-white shadow-md rounded-xl p-6 space-y-4">
+        <h2 className="text-2xl font-bold">{products?.banglaName}</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex justify-between border-b py-2">
+            <span className="font-semibold">ইংরেজি নাম</span>
+            <span>{products?.englishName}</span>
+          </div>
+          <div className="flex justify-between border-b py-2">
+            <span className="font-semibold">ক্রয় মূল্য</span>
+            <span>
               {showBuyPrice ? (
                 `${products?.buyingPrice} /=`
               ) : (
-                <button onClick={() => setShowBuyPrice(true)}>
+                <button
+                  onClick={() => setShowBuyPrice(true)}
+                  className="text-green-600 hover:text-green-800"
+                >
                   <Eye />
                 </button>
               )}
-            </td>
-          </tr>
-          <tr>
-            <td className="border p-2">বিক্রয় মূল্য</td>
-            <td className="border p-2">{products?.sellingPrice} /=</td>
-          </tr>
-          <tr>
-            <td className="border p-2">Bar Code</td>
-            <td className="border p-2">{products?.barCode || "n/a"}</td>
-          </tr>
-        </tbody>
-      </table>
-      <button
-        onClick={() => delteHandle(products?._id as string)}
-        className="bg-red-400 flex items-start text-white p-2 rounded-md mx-auto my-4 gap-1"
-      >
-        <Trash /> Delete
-      </button>
+            </span>
+          </div>
+          <div className="flex justify-between border-b py-2">
+            <span className="font-semibold">বিক্রয় মূল্য</span>
+            <span>{products?.sellingPrice} /=</span>
+          </div>
+          <div className="flex justify-between border-b py-2">
+            <span className="font-semibold">Bar Code</span>
+            <span>{products?.barCode || "n/a"}</span>
+          </div>
+        </div>
 
-      <form onSubmit={formHandle} className="flex flex-col gap-3">
-        <input
-          required
-          name="englishName"
-          className="w-full border-2 border-gray-300 focus:outline-green-600 font-medium text-lg py-2 pl-1 rounded-md"
-          type="text"
-          placeholder="ইংরেজি নাম"
-          defaultValue={products?.englishName}
-        />
-        <input
-          required
-          name="banglaName"
-          className="w-full border-2 border-gray-300 focus:outline-green-600 font-medium text-lg py-2 pl-1 rounded-md"
-          type="text"
-          placeholder="বাংলা নাম"
-          defaultValue={products?.banglaName}
-        />
-        <input
-          required
-          name="buyingPrice"
-          className="w-full border-2 border-gray-300 focus:outline-green-600 font-medium text-lg py-2 pl-1 rounded-md"
-          type="password"
-          placeholder="ক্রয় মুল্য"
-          defaultValue={products?.buyingPrice}
-        />
-        <input
-          required
-          name="sellingPrice"
-          className="w-full border-2 border-gray-300 focus:outline-green-600 font-medium text-lg py-2 pl-1 rounded-md"
-          type="text"
-          placeholder="বিক্রয় মুল্য"
-          defaultValue={products?.sellingPrice}
-        />
-
+        {/* Delete Button */}
         <button
-          disabled={waiting}
-          className="bg-green-400 rounded-md py-2 text-white text-2xl font-bold"
+          onClick={() => deleteHandle(products?._id as string)}
+          className="mt-6 w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg flex items-center justify-center gap-2 transition"
         >
-          {waiting ? "অপেক্ষা করুন" : "Update"}
+          <Trash />
+          Delete Product
         </button>
-      </form>
+      </div>
 
+      {/* Update Form */}
+      <div className="bg-white shadow-md rounded-xl p-6">
+        <h2 className="text-xl font-bold mb-4 text-center">Update Product Info</h2>
+        <form onSubmit={formHandle} className="flex flex-col gap-4 max-w-md mx-auto">
+          <input
+            required
+            name="englishName"
+            type="text"
+            placeholder="ইংরেজি নাম"
+            defaultValue={products?.englishName}
+            className="border-2 border-gray-300 rounded-lg py-2 px-3 focus:outline-green-500"
+          />
+          <input
+            required
+            name="banglaName"
+            type="text"
+            placeholder="বাংলা নাম"
+            defaultValue={products?.banglaName}
+            className="border-2 border-gray-300 rounded-lg py-2 px-3 focus:outline-green-500"
+          />
+          <input
+            required
+            name="buyingPrice"
+            type="password"
+            placeholder="ক্রয় মূল্য"
+            defaultValue={products?.buyingPrice}
+            className="border-2 border-gray-300 rounded-lg py-2 px-3 focus:outline-green-500"
+          />
+          <input
+            required
+            name="sellingPrice"
+            type="text"
+            placeholder="বিক্রয় মূল্য"
+            defaultValue={products?.sellingPrice}
+            className="border-2 border-gray-300 rounded-lg py-2 px-3 focus:outline-green-500"
+          />
+          <button
+            disabled={waiting}
+            className="bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg font-bold text-lg transition"
+          >
+            {waiting ? "অপেক্ষা করুন" : "Update"}
+          </button>
+        </form>
+      </div>
 
+      {/* Extra Info Section */}
+      {(!products?.barCode || !products?.stock || !products?.expiredDate) && (
+        <div className="bg-white shadow-md rounded-xl p-6">
+          <h2 className="text-xl font-bold text-center mb-4">অতিরিক্ত তথ্য</h2>
+          <div className="flex flex-col md:flex-row justify-evenly gap-4">
+            {!products?.barCode && <UpdateBarcode id={products?._id as string} />}
+            {!products?.stock && <UpdateStock />}
+            {!products?.expiredDate && <UpdateExpireDate />}
+          </div>
+        </div>
+      )}
 
-
-      {!products?.barCode || !products?.strock || products?.expiredDate ? <div>
-        <h1 className="text-2xl font-bold my-3 text-center mt-5">অতিরিক্ত তথ্য</h1>
-        <div className="flex justify-evenly mb-12">{!products?.barCode ? <UpdateBarcode id={products?._id as string} /> : null}
-          {!products?.strock ? <UpdateStock /> : null}
-          {!products?.expiredDate ? <UpdateExpireDate /> : null}</div>
-      </div> : null}
-
-
-
-
-
+      {/* Barcode Scanner */}
       <BarCodeScannerComponent />
     </div>
   );

@@ -120,7 +120,7 @@ const UpdateBarcodeUi = ({ id }: { id: string }) => {
         <div>
             <video ref={updateBarcodeVideoRef} className="w-full max-w-md rounded-lg shadow-md" />
             {wait && (
-                <p className="mt-2 text-green-600 font-semibold">{wait ? "Loading..." : null}</p>
+                <p className="mt-2 text-green-600 font-semibold">{wait ? "Scanning..." : null}</p>
             )}
         </div>
     );

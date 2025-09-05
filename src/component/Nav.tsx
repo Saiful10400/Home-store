@@ -67,12 +67,12 @@ const Nav = () => {
         >
          কেলকুলেটর
         </button>
-        {/* <button
+        <button
           className="bg-gray-700 text-white w-full inline-block text-center rounded-md py-1"
           onClick={() => navigate("/create-product")}
         >
           নতুন পণ্য যুক্ত করুন
-        </button> */}
+        </button>
       </div>
     </div>
   );
