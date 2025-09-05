@@ -19,27 +19,27 @@ const SearchWithBarCodeUi = () => {
     }
 
 
-  
+
 
 
 
     useEffect(() => {
-          const manageSearchedProduct = (barCode: string) => {
-        axios.get("https://home-store-backend.vercel.app/api/shop/find-product?barCode=" + barCode).then((res) => {
-            if (res.data?.statusCode === 200) {
-                setWait(false);
-                if (res.data.data) {
-                    move("/product/" + res.data.data._id)
-                } else {
-                    setMessage("কোন পণ্য পাওয়া যায়নি")
+        const manageSearchedProduct = (barCode: string) => {
+            axios.get("https://home-store-backend.vercel.app/api/shop/find-product?barCode=" + barCode).then((res) => {
+                if (res.data?.statusCode === 200) {
+                    setWait(false);
+                    if (res.data.data) {
+                        move("/product/" + res.data.data._id)
+                    } else {
+                        setMessage("কোন পণ্য পাওয়া যায়নি")
+                    }
+
+                    console.log(res.data.data);
+
+
                 }
-
-                console.log(res.data.data);
-
-
-            }
-        });
-    }
+            });
+        }
 
         const hints = new Map();
         hints.set(DecodeHintType.POSSIBLE_FORMATS, [
@@ -67,18 +67,27 @@ const SearchWithBarCodeUi = () => {
 
                     const selectedCamera = backCameras.length > 0 ? backCameras[backCameras.length - 1] : videoInputDevices[0];
 
-                    codeReader.decodeFromVideoDevice(selectedCamera.deviceId, updateBarcodeVideoRef.current!, (result, err) => {
-                        if (result && updateBarcodeVideoRef.current) {
-                            codeReader.reset()
-                            updateBarcodeVideoRef.current.style.display = "none"
-                            playBeep()
-                            manageSearchedProduct(result.getText())
+                    codeReader.decodeFromConstraints(
+                        // selectedCamera.deviceId
+                        {
+                            video: {
+                                deviceId: selectedCamera.deviceId, // or facingMode: "environment"
+                                width: { ideal: 1920 },
+                                height: { ideal: 1080 },
+                            }
+                        }
+                        , updateBarcodeVideoRef.current!, (result, err) => {
+                            if (result && updateBarcodeVideoRef.current) {
+                                codeReader.reset()
+                                updateBarcodeVideoRef.current.style.display = "none"
+                                playBeep()
+                                manageSearchedProduct(result.getText())
 
-                        }
-                        if (err) {
-                            // console.error(err);
-                        }
-                    });
+                            }
+                            if (err) {
+                                // console.error(err);
+                            }
+                        });
                 })
                 .catch((err) => {
                     console.error(err);
