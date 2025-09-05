@@ -1,88 +1,117 @@
-import { BarcodeFormat, BrowserMultiFormatReader, DecodeHintType } from "@zxing/library";
+
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 import Swal from "sweetalert2";
 import beepAudio from "../asset/beep.mp3"
-
+import { BrowserMultiFormatOneDReader } from "@zxing/browser";
+interface ExtendedMediaTrackConstraints extends MediaTrackConstraints { zoom?: number; }
 
 const UpdateBarcodeUi = ({ id }: { id: string }) => {
 
-
+    const [cleanup, setclieanup] = useState(false)
     const [wait, setWait] = useState(false)
     const updateBarcodeVideoRef = useRef<HTMLVideoElement>(null)
 
 
     const playBeep = () => {
-        const audio = new Audio(beepAudio)
-        audio.play()
-    }
-
+        const audio = new Audio(beepAudio);
+        audio.play();
+    };
 
 
     useEffect(() => {
+        let codeReader: BrowserMultiFormatOneDReader | null = null;
+        let stream: MediaStream | null = null;
 
-        const hints = new Map();
-        hints.set(DecodeHintType.POSSIBLE_FORMATS, [
-            BarcodeFormat.CODE_128,
-            BarcodeFormat.CODE_39,
-            BarcodeFormat.EAN_13,
-            BarcodeFormat.EAN_8,
-            BarcodeFormat.UPC_A,
-            BarcodeFormat.UPC_E,
-            BarcodeFormat.ITF,
-        ]);
-
-
-        const codeReader = new BrowserMultiFormatReader(hints)
-        if (updateBarcodeVideoRef.current) {
-
-            codeReader
-                .listVideoInputDevices()
-                .then((videoInputDevices) => {
-
-                    const backCameras = videoInputDevices.filter((d) =>
-                        d.label.toLowerCase().includes("back")
-                    );
-
-
-                    const selectedCamera = backCameras.length > 0 ? backCameras[backCameras.length - 1] : videoInputDevices[0];
-
-                    codeReader.decodeFromVideoDevice(selectedCamera.deviceId, updateBarcodeVideoRef.current!, (result, err) => {
-                        if (result && updateBarcodeVideoRef.current) {
-                            playBeep()
-                            codeReader.reset()
-                            updateBarcodeVideoRef.current.style.display = "none"
-                            axios.put("https://home-store-backend.vercel.app/api/shop/update-product/" + id, { barCode: result.getText() }).then((res) => {
-                                if (res.data?.statusCode === 200) {
-                                    setWait(false);
-                                    Swal.fire({
-                                        title: "আপডেট হয়েছে",
-                                        icon: "success",
-                                        draggable: true,
-                                    });
-
-
-                                }
-                            });
-
+        const updateProductBarcode = async (barCode: string) => {
+            setWait(true);
+            try {
+                axios.put("https://home-store-backend.vercel.app/api/shop/update-product/" + id, { barCode: barCode }).then((res) => {
+                    if (res.data?.statusCode === 200) {
+                        setWait(false);
+                        setclieanup(true)
+                        if (stream) {
+                            stream.getTracks().forEach((t) => t.stop());
                         }
-                        if (err) {
-                            // console.error(err);
-                        }
-                    });
-                })
-                .catch((err) => {
-                    console.error(err);
+                        Swal.fire({
+                            title: "আপডেট হয়েছে",
+                            icon: "success",
+                            draggable: true,
+                        }).then(()=>{
+                            window.location.reload();
+                        })
+
+
+                    }
+                });
+            } catch (err) {
+                setWait(false);
+                console.error(err);
+            }
+        };
+
+        const startScanner = async () => {
+            try {
+                // 1️⃣ Create a 1D barcode reader
+                codeReader = new BrowserMultiFormatOneDReader()
+
+                // 2️⃣ Get all video devices
+                const devices = await BrowserMultiFormatOneDReader.listVideoInputDevices();
+                const backCameras = devices.filter((d) =>
+                    d.label.toLowerCase().includes("back")
+                );
+                const selectedCamera =
+                    backCameras.length > 0 ? backCameras[backCameras.length - 1] : devices[0];
+
+                // 3️⃣ Get high-res camera stream
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        deviceId: { exact: selectedCamera.deviceId },
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 },
+                    },
                 });
 
+                if (updateBarcodeVideoRef.current) {
+                    updateBarcodeVideoRef.current.srcObject = stream;
+                    updateBarcodeVideoRef.current.style.display = "block";
+                    await updateBarcodeVideoRef.current.play();
+                    setWait(true);
+                }
 
-        }
+                // 4️⃣ Apply zoom if supported
+                const track = stream.getVideoTracks()[0];
+                const capabilities = track.getCapabilities() as MediaTrackCapabilities & {
+                    zoom?: { min: number; max: number };
+                };
+                if (capabilities.zoom) {
+                    const zoomLevel = Math.min(2, capabilities.zoom.max);
+                    await track.applyConstraints({ advanced: [{ zoom: zoomLevel }] as ExtendedMediaTrackConstraints[] });
+                }
+
+                // 5️⃣ Start continuous scanning
+                codeReader.decodeFromVideoElement(updateBarcodeVideoRef.current!, (result) => {
+                    if (result&& !cleanup) {
+                        playBeep();
+                        updateProductBarcode(result.getText());
+                    }
+                    // Ignore NotFoundException, it’s normal during live scanning
+                });
+            } catch (err) {
+                console.error("Camera/Scanner error:", err);
+            }
+        };
+
+        startScanner();
+
         return () => {
-            codeReader.reset()
-        }
 
-    }, [id])
-
+            if (stream) {
+                stream.getTracks().forEach((t) => t.stop());
+            }
+        };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [id]);
 
 
 
