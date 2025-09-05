@@ -67,6 +67,37 @@ const SearchWithBarCodeUi = () => {
 
                     const selectedCamera = backCameras.length > 0 ? backCameras[backCameras.length - 1] : videoInputDevices[0];
 
+
+
+                    // let's manupulate the video stream
+                    (async () => {
+                        let stream: MediaStream | null = null
+                        stream = await navigator.mediaDevices.getUserMedia(
+                            {
+                                video: {
+                                    deviceId: { exact: selectedCamera.deviceId },
+                                    width: { ideal: 1920 },
+                                    height: { ideal: 1080 }
+                                }
+                            }
+                        )
+
+                        if (updateBarcodeVideoRef.current && stream) {
+                            updateBarcodeVideoRef.current.srcObject = stream
+                            updateBarcodeVideoRef.current.style.display = "block"
+                            await updateBarcodeVideoRef.current.play()
+                            setWait(true)
+                        }
+
+                        // let's zoom the video 2x if possible.
+                        const track = stream.getVideoTracks()[0];
+                        const capabilities = track.getCapabilities();
+                         alert(JSON.stringify(capabilities))
+                         
+                    })()
+
+return
+
                     codeReader.decodeFromConstraints(
                         // selectedCamera.deviceId
                         {
