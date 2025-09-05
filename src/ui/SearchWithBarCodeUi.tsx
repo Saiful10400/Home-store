@@ -89,14 +89,21 @@ const SearchWithBarCodeUi = () => {
                             setWait(true)
                         }
 
+
+                        interface ExtendedMediaTrackConstraints extends MediaTrackConstraints {
+                            zoom?: number;
+                        }
                         // let's zoom the video 2x if possible.
                         const track = stream.getVideoTracks()[0];
-                        const capabilities = track.getCapabilities();
-                         alert(JSON.stringify(capabilities))
-                         
+                        const capabilities = track.getCapabilities() as MediaTrackCapabilities & { zoom?: { max: number, min: number } };
+                        if (capabilities?.zoom) {
+                            const zoomLevel = Math.min(2, capabilities.zoom.max)
+                            await track.applyConstraints({ advanced: [{ zoom: zoomLevel }] as ExtendedMediaTrackConstraints[] })
+                        }
+
                     })()
 
-return
+                    return
 
                     codeReader.decodeFromConstraints(
                         // selectedCamera.deviceId
