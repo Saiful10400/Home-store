@@ -2,13 +2,14 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { tProducts } from "../types";
-import { Eye, Trash } from "lucide-react";
+import { Eye, Trash, Camera, CheckCircle2, Loader } from "lucide-react";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import BarCodeScannerComponent from "../component/Shared/BarCodeScannerComponent";
 import UpdateBarcode from "../component/extraInfoFields/UpdateBarcode";
 import UpdateStock from "../component/extraInfoFields/UpdateStock";
 import UpdateExpireDate from "../component/extraInfoFields/UpdateExpireDate";
+import { imageUploadToDb } from "../utils/imageUpload";
 
 const SingleProduct = () => {
   const [refetch, setRefetch] = useState(false);
@@ -17,6 +18,8 @@ const SingleProduct = () => {
   const navigate = useNavigate();
   const [showBuyPrice, setShowBuyPrice] = useState(false);
   const [waiting, setWaiting] = useState(false);
+  const [updatingImage, setUpdatingImage] = useState(false);
+  const [imageAdded, setImageAdded] = useState(false);
 
   useEffect(() => {
     axios
@@ -80,14 +83,53 @@ const SingleProduct = () => {
       });
   };
 
+  // Handle Image Update
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !products) return;
+    setUpdatingImage(true);
+    try {
+      const imageUrl = await imageUploadToDb(file); // Upload to your storage
+      await axios.put(
+        `https://home-store-backend.vercel.app/api/shop/update-product/${products._id}`,
+        { image: imageUrl }
+      );
+      toast.success("Image updated successfully");
+      setImageAdded(false);
+      setRefetch((p) => !p);
+    } catch (err) {
+      console.error(err);
+      toast.error("Image update failed. Try again.");
+    } finally {
+      setUpdatingImage(false);
+    }
+  };
+
   return (
     <div className="max-w-5xl mx-auto p-4 md:p-8 space-y-6">
-      {/* Product Image */}
-      <div className="w-full rounded-xl overflow-hidden shadow-lg">
+      {/* Product Image Update */}
+      <div className="relative w-full rounded-xl overflow-hidden shadow-lg">
         <img
           src={products?.image}
           alt={products?.banglaName}
           className="w-full object-cover max-h-96"
+        />
+        <label
+          htmlFor="productImage"
+          className="absolute bottom-4 right-4 bg-green-500 hover:bg-green-600 text-white p-3 rounded-full cursor-pointer flex items-center justify-center transition"
+        >
+          {updatingImage ? <Loader className="w-6 h-6" /> : imageAdded ? <CheckCircle2 className="w-6 h-6" /> : <Camera className="w-6 h-6" />}
+        </label>
+        <input
+          type="file"
+          id="productImage"
+          accept="image/*"
+          capture="environment"
+          className="hidden"
+          onChange={(e) => {
+            setImageAdded(true);
+            handleImageChange(e);
+          }}
         />
       </div>
 
