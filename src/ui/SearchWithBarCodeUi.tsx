@@ -1,9 +1,10 @@
-import { BarcodeFormat, BrowserMultiFormatReader, DecodeHintType } from "@zxing/library";
+import { BrowserMultiFormatReader } from "@zxing/browser";
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
 
 import beepAudio from "../asset/beep.mp3"
 import { useNavigate } from "react-router-dom";
+import { BarcodeFormat, DecodeHintType } from "@zxing/library";
 
 
 const SearchWithBarCodeUi = () => {
@@ -20,7 +21,13 @@ const SearchWithBarCodeUi = () => {
 
 
 
+    interface ZXingReaderWithReset extends BrowserMultiFormatReader {
+        reset(): void;
+    }
 
+    interface ExtendedMediaTrackConstraints extends MediaTrackConstraints {
+        zoom?: number;
+    }
 
 
     useEffect(() => {
@@ -54,9 +61,11 @@ const SearchWithBarCodeUi = () => {
 
 
         const codeReader = new BrowserMultiFormatReader(hints)
+
         if (updateBarcodeVideoRef.current) {
 
-            codeReader
+
+            BrowserMultiFormatReader
                 .listVideoInputDevices()
                 .then((videoInputDevices) => {
 
@@ -90,9 +99,7 @@ const SearchWithBarCodeUi = () => {
                         }
 
 
-                        interface ExtendedMediaTrackConstraints extends MediaTrackConstraints {
-                            zoom?: number;
-                        }
+
                         // let's zoom the video 2x if possible.
                         const track = stream.getVideoTracks()[0];
                         const capabilities = track.getCapabilities() as MediaTrackCapabilities & { zoom?: { max: number, min: number } };
@@ -102,21 +109,12 @@ const SearchWithBarCodeUi = () => {
                         }
 
                     })()
+ 
 
-                    return
-
-                    codeReader.decodeFromConstraints(
-                        // selectedCamera.deviceId
-                        {
-                            video: {
-                                deviceId: selectedCamera.deviceId, // or facingMode: "environment"
-                                width: { ideal: 1920 },
-                                height: { ideal: 1080 },
-                            }
-                        }
-                        , updateBarcodeVideoRef.current!, (result, err) => {
+                    codeReader.decodeFromVideoElement(
+                        updateBarcodeVideoRef.current!, (result, err) => {
                             if (result && updateBarcodeVideoRef.current) {
-                                codeReader.reset()
+                                (codeReader as ZXingReaderWithReset).reset()
                                 updateBarcodeVideoRef.current.style.display = "none"
                                 playBeep()
                                 manageSearchedProduct(result.getText())
@@ -134,7 +132,7 @@ const SearchWithBarCodeUi = () => {
 
         }
         return () => {
-            codeReader.reset()
+            // (codeReader as ZXingReaderWithReset).reset()
         }
 
     }, [move])
