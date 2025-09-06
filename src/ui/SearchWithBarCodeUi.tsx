@@ -7,6 +7,7 @@ import { X } from "lucide-react";
 
 interface ExtendedMediaTrackConstraints extends MediaTrackConstraints {
   zoom?: number;
+  focusMode?: string;
 }
 
 interface Props {
@@ -17,6 +18,7 @@ const SearchWithBarCodeUi = ({ onClose }: Props) => {
   const [message, setMessage] = useState("");
   const [wait, setWait] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const navigate = useNavigate();
 
   const playBeep = () => {
@@ -27,6 +29,7 @@ const SearchWithBarCodeUi = ({ onClose }: Props) => {
   useEffect(() => {
     let codeReader: BrowserMultiFormatOneDReader | null = null;
     let stream: MediaStream | null = null;
+    let snapshotInterval: ReturnType<typeof setInterval> | null = null;
 
     const manageSearchedProduct = async (barCode: string) => {
       setWait(true);
@@ -64,8 +67,8 @@ const SearchWithBarCodeUi = ({ onClose }: Props) => {
         stream = await navigator.mediaDevices.getUserMedia({
           video: {
             deviceId: { exact: selectedCamera.deviceId },
-            width: { ideal: 1920 },
-            height: { ideal: 1080 },
+            width: { ideal: 3840 }, // try higher resolution
+            height: { ideal: 2160 },
           },
         });
 
@@ -76,11 +79,19 @@ const SearchWithBarCodeUi = ({ onClose }: Props) => {
           setWait(true);
         }
 
-        // Zoom if supported
+        // Autofocus + zoom if supported
         const track = stream.getVideoTracks()[0];
         const capabilities = track.getCapabilities() as MediaTrackCapabilities & {
           zoom?: { min: number; max: number };
+          focusMode?: string[];
         };
+
+        if (capabilities.focusMode?.includes("continuous")) {
+          await track.applyConstraints({
+            advanced: [{ focusMode: "continuous" }] as ExtendedMediaTrackConstraints[],
+          });
+        }
+
         if (capabilities.zoom) {
           const zoomLevel = Math.min(2, capabilities.zoom.max);
           await track.applyConstraints({
@@ -88,21 +99,50 @@ const SearchWithBarCodeUi = ({ onClose }: Props) => {
           });
         }
 
+        // Start live decoding
         codeReader.decodeFromVideoElement(videoRef.current!, (result) => {
           if (result) {
             playBeep();
             manageSearchedProduct(result.getText());
           }
         });
+
+        // Fallback: snapshot scanning every 2s
+        snapshotInterval = setInterval(async () => {
+          if (!canvasRef.current || !videoRef.current) return;
+          const ctx = canvasRef.current.getContext("2d");
+          if (!ctx) return;
+
+          canvasRef.current.width = videoRef.current.videoWidth;
+          canvasRef.current.height = videoRef.current.videoHeight;
+          ctx.drawImage(
+            videoRef.current,
+            0,
+            0,
+            canvasRef.current.width,
+            canvasRef.current.height
+          );
+
+          try {
+            const result = await codeReader!.decodeFromCanvas(canvasRef.current);
+            if (result) {
+              playBeep();
+              manageSearchedProduct(result.getText());
+              if (snapshotInterval) clearInterval(snapshotInterval);
+            }
+          } catch {
+            // ignore NotFound errors
+          }
+        }, 2000);
       } catch (err) {
         console.error("Camera/Scanner error:", err);
-        
       }
     };
 
     startScanner();
 
     return () => {
+      if (snapshotInterval) clearInterval(snapshotInterval);
       if (stream) {
         stream.getTracks().forEach((t) => t.stop());
       }
@@ -123,11 +163,20 @@ const SearchWithBarCodeUi = ({ onClose }: Props) => {
         )}
 
         {/* Scanner Video */}
-        <video
-          ref={videoRef}
-          className="w-full rounded-xl shadow-md border-2 border-gray-300"
-          playsInline
-        />
+        <div className="relative w-full">
+          <video
+            ref={videoRef}
+            className="w-full rounded-xl shadow-md border-2 border-gray-300"
+            playsInline
+          />
+          {/* Overlay scan box */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-3/4 h-24 border-4 border-green-500 rounded-md"></div>
+          </div>
+        </div>
+
+        {/* Hidden canvas for snapshot fallback */}
+        <canvas ref={canvasRef} className="hidden" />
 
         {/* Messages */}
         {message && (
