@@ -1,5 +1,4 @@
-## How to Run the Project Locally..
-...
+## How to Run the Project Locally.
 1. Clone the repository: 
 
     ```bash
