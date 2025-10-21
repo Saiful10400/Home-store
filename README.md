@@ -1,7 +1,7 @@
 ## How to Run the Project Locally.
 1. Clone the repository:    
     
-    ```bash 
+    ```bash  
     git clone https://github.com/Saiful10400/Job-task-Zaimah-technology
     ```
 
