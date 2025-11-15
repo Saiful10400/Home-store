@@ -11,7 +11,7 @@
     cd your-repo-name
     ```
  
-3. Install dependencies:
+3. Install dependencies: 
 
     ```bash
     npm install
