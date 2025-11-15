@@ -3,7 +3,7 @@
                                              
     ```bash                  
     git clone  https://github.com/Saiful10400/Job-task-Zaimah-technology  
-    ```
+    ``` 
   
 2. Navigate to the project directory:
 
